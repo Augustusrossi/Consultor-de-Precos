@@ -15,5 +15,15 @@
 | Augusto Folva | @Augusto-fp |
 | Augustus Klingbeil | @Augustusrossi |
 | Kevin Nascimento | @Kevin-nascimento |
+| João Victor Teles | @--- |
+
+
 ## Arquitetura
-> *A ser preenchido na Aula 6*
+```mermaid
+flowchart TB
+    A["Game research"] --> B["Query APIs"]
+    B --> C["Returns: game prices and data"]
+    C --> D["Gemini processing informacion"]
+    D --> E["Price history and"]
+
+```
