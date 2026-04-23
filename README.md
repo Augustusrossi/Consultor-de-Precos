@@ -15,7 +15,7 @@
 | Augusto Folva | @Augusto-fp |
 | Augustus Klingbeil | @Augustusrossi |
 | Kevin Nascimento | @Kevin-nascimento |
-| João Victor Teles | @--- |
+| João Victor Teles | @jvictorcarneiro-max |
 
 
 ## Arquitetura
