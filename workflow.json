@@ -1,0 +1,299 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        0
+      ],
+      "id": "0c44a4c5-fff2-4b59-abe2-004761a98074",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1ppFa28VLBvYs6RLRGxQJVgLshTjMUBy5r1sLRX_z3fQ/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ppFa28VLBvYs6RLRGxQJVgLshTjMUBy5r1sLRX_z3fQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -496,
+        -112
+      ],
+      "id": "1530080e-f963-480b-bc23-bbd91fd9af19",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9WepWl9ccdedzlLT",
+          "name": "n8n conexao"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3a378b75-8387-4f8f-8112-3c58c57a4fa3",
+              "leftValue": "={{ Number($json['Mínimo'] )}}",
+              "rightValue": "=\n{{ Number($json.faixaMin )}}",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "fe08dd83-ce70-4dbc-910e-f67785833e61",
+              "leftValue": "={{ Number($json['Máximo'] )}}",
+              "rightValue": "={{ Number($json.faixaMax )}}",
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        128,
+        -16
+      ],
+      "id": "11c84c8e-d5e8-462e-8dbd-ff6e7a8a2673",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1ewL8NfyXkg7AAHsmbhq3oH_buxv61DAD6FiQ8xBF3to/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 154883746,
+          "mode": "list",
+          "cachedResultName": "Respostas ao formulário 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ewL8NfyXkg7AAHsmbhq3oH_buxv61DAD6FiQ8xBF3to/edit#gid=154883746"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -496,
+        112
+      ],
+      "id": "fc82e52c-500e-4a60-93ef-e1797b5369fe",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9WepWl9ccdedzlLT",
+          "name": "n8n conexao"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a32456a1-13b5-4b71-8b18-3625f0281ee4",
+              "name": "Result",
+              "value": "Esse jogo não está disponível para essa faixa de preço.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        96
+      ],
+      "id": "f3914890-79f7-4da5-9aff-b09f26102548",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a32456a1-13b5-4b71-8b18-3625f0281ee4",
+              "name": "Result",
+              "value": "Esse jogo está disponível para essa faixa de preço.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "79528380-0cd3-4640-9977-db20952d923d",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Jogos",
+              "field2": "Selecione o jogo:"
+            }
+          ]
+        },
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -288,
+        -16
+      ],
+      "id": "98412061-c022-4ba3-9e53-e58b58390c8b",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "function faixaParaNumero(faixa) {\n  if (!faixa) return { min: null, max: null };\n\n  switch (faixa) {\n    case \"Entre 10 e 70\": return { min: 10, max: 70 };\n    case \"Entre 71 e 160\": return { min: 71, max: 160 };\n    case \"Entre 161 e 290\": return { min: 161, max: 290 };\n    case \"Entre 291 e 380\": return { min: 291, max: 380 };\n    case \"Maior que 380\": return { min: 380, max: 99999 };\n    default: return { min: null, max: null };\n  }\n}\n\n// Puxa todos os itens da entrada\nconst items = $input.all();\n\n// Mapeia e retorna todos os itens modificados\nreturn items.map(item => {\n  const faixaTexto = item.json['Selecione a faixa de preço:'];\n  const faixa = faixaParaNumero(faixaTexto);\n\n  return {\n    json: {\n      ...item.json,\n      faixaMin: faixa.min,\n      faixaMax: faixa.max\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -80,
+        -16
+      ],
+      "id": "2343367f-72b0-4912-aa8f-d5d05fdb1a10",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "bef806ae-b989-4d1f-8d1c-8a44f1f1fd7f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "88cacad0f8f5aa5b2507f7a3b825ddceadf5de750c3db5d71b001f738f493232"
+  },
+  "id": "pM7cW23QFWWDa76K",
+  "tags": []
+}
