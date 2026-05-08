@@ -1,0 +1,371 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -80
+      ],
+      "id": "2538aeac-9099-4c12-9bb9-21e92f752d7b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3a378b75-8387-4f8f-8112-3c58c57a4fa3",
+              "leftValue": "={{ Number($json.salePrice * 5) }}",
+              "rightValue": "={{ Number($json.faixaMin )}}",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            },
+            {
+              "id": "fe08dd83-ce70-4dbc-910e-f67785833e61",
+              "leftValue": "={{ Number($json.salePrice * 5) }}",
+              "rightValue": "={{ Number($json.faixaMax )}}",
+              "operator": {
+                "type": "number",
+                "operation": "lte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1088,
+        -80
+      ],
+      "id": "14577270-c119-478b-b709-adc8cf1db595",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={\n  \"resultado\": \"Com base na sua preferência por {{ $('Code in JavaScript1').item.json['Selecione o jogo:'] }} e no seu orçamento (R$ {{ $('Code in JavaScript1').item.json['faixaMin'] }} - R$ {{ $('Code in JavaScript1').item.json['faixaMax'] }}), aqui está a análise: {{ $json.candidates[0].content.parts[0].text }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1888,
+        16
+      ],
+      "id": "5fd2f682-bb51-4541-b2e4-3e0ae025ba59",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a32456a1-13b5-4b71-8b18-3625f0281ee4",
+              "name": "Result",
+              "value": "=Esse jogo está disponível para essa faixa de preço.  {{ $json.internalName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        -176
+      ],
+      "id": "35713653-4c74-416b-bd6c-b755ab09a646",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "jsCode": "function faixaParaNumero(faixa) {\n  if (!faixa) return { min: null, max: null };\n\n  faixa = faixa.toLowerCase().trim();\n\n  switch (faixa) {\n    case \"entre 10 e 70\":\n      return { min: 10, max: 70 };\n\n    case \"entre 71 e 160\":\n      return { min: 71, max: 160 };\n\n    case \"entre 161 e 290\":\n      return { min: 161, max: 290 };\n\n    case \"entre 291 e 380\":\n      return { min: 291, max: 380 };\n\n    case \"maior que 380\":\n      return { min: 380, max: 99999 };\n\n    default:\n      return { min: null, max: null };\n  }\n}\n\nconst formsData = $(\"forms\").first().json;\n\nconst faixaTexto = formsData[\"Selecione a faixa de preço:\"];\nconst faixa = faixaParaNumero(faixaTexto);\n\nreturn $input.all().map(item => ({\n  json: {\n    ...item.json,\n    faixaMin: faixa.min,\n    faixaMax: faixa.max\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        -80
+      ],
+      "id": "b342dab1-b198-4cb0-be29-cacd0c6df8ea",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Persona:\nVocê é o “Analista Steam BRL”: um assistente especializado em avaliar promoções de jogos usando preços convertidos para Reais (BRL). Seu tom é amigável, direto e honesto.\n\nObjetivo:\nAnalisar se o jogo enviado vale a pena com base no preço atual, histórico e faixa de preço desejada pelo usuário.\n\nRegras de Ouro:\n\nConversão: Converta sempre o PROMO_USD para BRL multiplicando pelo CAMBIO. Use o valor de R$ 5,10 se nenhum câmbio for informado.\n\nNão invente: Use apenas os números fornecidos. Se um dado faltar, ignore-o em vez de criar um.\n\nVeredito: Se o preço convertido estiver entre VALOR_MIN e VALOR_MAX, a recomendação tende a ser positiva.\n\nDireto ao ponto: Responda em no máximo 6 linhas.\n\nTarefa de Saída:\n\nDiga em 1 linha se vale a pena comprar agora (Sim/Não).\n\nJustifique em 1 linha comparando o preço em BRL com o desconto (SAVINGS) e a avaliação (STEAM_RATING).\n\nSe estiver acima do VALOR_MAX, sugira esperar e indique o alvo ideal baseado no VALOR_MIN."
+            },
+            {
+              "content": "=JOGO_TITULO := {{ $json.title }}\nPRECO_PROMO_USD := {{ $json.salePrice }}\nPRECO_NORMAL_USD := {{ $json.normalPrice }}\nSAVINGS := {{ $json.savings }}%\nDEAL_RATING := {{ $json.dealRating }}\nSTEAM_RATING := {{ $json.steamRatingPercent }}%\n\nJOGO_ESCOLHIDO := {{ $json['Selecione o jogo:'] }}\nVALOR_MIN := {{ $json.faixaMin }}\nVALOR_MAX := {{ $json.faixaMax }}\n\nCAMBIO := 5.10"
+            }
+          ]
+        },
+        "simplify": false,
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        1536,
+        16
+      ],
+      "id": "d5dbed8f-2a63-46ac-a4a2-74463d1c6c7b",
+      "name": "Message a model",
+      "notesInFlow": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "DYMuhBmJAQtkHnMT",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: items[0].json\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        16
+      ],
+      "id": "9e4fd172-e6d1-44c3-b6f8-cc8551e7c842",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1ewL8NfyXkg7AAHsmbhq3oH_buxv61DAD6FiQ8xBF3to/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 154883746,
+          "mode": "list",
+          "cachedResultName": "Respostas ao formulário 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ewL8NfyXkg7AAHsmbhq3oH_buxv61DAD6FiQ8xBF3to/edit#gid=154883746"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        16
+      ],
+      "id": "39fbf72b-8c99-46cd-92bb-6c23e7b6003d",
+      "name": "forms",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9WepWl9ccdedzlLT",
+          "name": "n8n conexao"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1ppFa28VLBvYs6RLRGxQJVgLshTjMUBy5r1sLRX_z3fQ/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Página1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ppFa28VLBvYs6RLRGxQJVgLshTjMUBy5r1sLRX_z3fQ/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -96,
+        -272
+      ],
+      "id": "3b411eb7-9486-4e7a-867a-ca9a5aea2c86",
+      "name": "Banco1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "9WepWl9ccdedzlLT",
+          "name": "n8n conexao"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.cheapshark.com/api/1.0/deals?storeID=1&",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        400,
+        -208
+      ],
+      "id": "e2ebb72c-1aee-4610-af74-4bb196f77fb6",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        672,
+        -80
+      ],
+      "id": "f40b1eaa-e009-44a7-945b-6ceda854f563",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "forms",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "forms": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1f3fdd77-7587-4547-b124-69f71ae95976",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "88cacad0f8f5aa5b2507f7a3b825ddceadf5de750c3db5d71b001f738f493232"
+  },
+  "id": "pM7cW23QFWWDa76K",
+  "tags": []
+}
